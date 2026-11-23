@@ -78,8 +78,21 @@ document.getElementById('save').onclick=function(){
   if(!window.html2canvas){alert('이미지 저장 기능을 불러오지 못했어요. 화면 캡처를 이용해 주세요.');return}
   nums.forEach(function(n){n.blur()});
   html2canvas(board,{scale:2,backgroundColor:'#f7f6f2',useCORS:true,onclone:function(d){var b=d.getElementById('board');b.style.transform='none';b.parentElement.style.width='966px';b.parentElement.style.height='966px'}}).then(function(cv){
-    var a=document.createElement('a');a.download='장보람-필모-정산-2026.png';a.href=cv.toDataURL('image/png');a.click()
-  }).catch(function(){alert('저장에 실패했어요. 화면 캡처를 이용해 주세요.')})};
+    showResult(cv)
+  }).catch(function(e){alert('저장에 실패했어요. 화면 캡처를 이용해 주세요.\n('+(e&&e.message||e)+')')})};
+function showResult(cv){
+  var NM='장보람-필모-정산-2026.png',ov=document.createElement('div'),im=document.createElement('img'),tx=document.createElement('div'),row=document.createElement('div');
+  ov.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:99;background:rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px';
+  im.src=cv.toDataURL('image/png');im.alt='';im.style.cssText='max-width:100%;max-height:68vh;border-radius:6px';
+  tx.textContent='이미지를 길게 눌러 저장하거나, 아래 버튼을 눌러 주세요';tx.style.cssText='color:#fff;font-size:14px;text-align:center';
+  row.style.cssText='display:flex;gap:10px';
+  function bt(t,f,bg){var b=document.createElement('button');b.textContent=t;b.style.cssText='padding:10px 20px;border:0;border-radius:999px;font-size:15px;cursor:pointer;color:#fff;background:'+bg;b.onclick=f;row.appendChild(b)}
+  bt('저장 / 공유',function(){cv.toBlob(function(b){if(!b)return;var f;try{f=new File([b],NM,{type:'image/png'})}catch(e){}
+    if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(function(){})}
+    else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=NM;document.body.appendChild(a);a.click();a.remove()}})},'#8f88c4');
+  bt('닫기',function(){ov.remove()},'#666');
+  ov.appendChild(im);ov.appendChild(tx);ov.appendChild(row);document.body.appendChild(ov)
+}
 var imgs=[].slice.call(document.querySelectorAll('.stamp img')),defs=imgs.map(function(i){return i.src}),IK='filmo2026img',picker=document.createElement('input'),cur=null;
 picker.type='file';picker.accept='image/*';picker.style.display='none';document.body.appendChild(picker);
 imgs.forEach(function(im,i){var s=im.parentNode;s.style.cursor='pointer';s.title='클릭해서 사진 바꾸기';s.addEventListener('click',function(){cur=i;picker.value='';picker.click()})});
